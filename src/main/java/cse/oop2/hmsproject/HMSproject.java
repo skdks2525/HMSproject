@@ -11,6 +11,6 @@ package cse.oop2.hmsproject;
 public class HMSproject {
 
     public static void main(String[] args) {
-        자 이게 테스트야
+        System.out.println("");   
     }
 }
