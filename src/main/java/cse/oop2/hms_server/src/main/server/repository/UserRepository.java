@@ -24,13 +24,13 @@ public class UserRepository {
             
             while((line = reader.readLine()) != null){
                 String[] parts = line.split(",");
-            }
-            
-            if(parts.length == 3 && parts[0].equals(id)){ //id 일치하면 User객체 생성 후 반환
-                return new User(parts[0], parts[1], parts[2]);
+                
+                 if(parts.length == 3 && parts[0].equals(id)){ //id 일치하면 User객체 생성 후 반환
+                     return new User(parts[0], parts[1], parts[2]);
+                 }
             }
         }
-        catch(Exception ex){
+        catch(IOException ex){
             System.out.println("CVS 파일찾기 오류");
             ex.printStackTrace();
         }

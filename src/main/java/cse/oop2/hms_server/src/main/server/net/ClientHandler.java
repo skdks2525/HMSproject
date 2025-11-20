@@ -31,6 +31,7 @@ public class ClientHandler implements Runnable {
         String request;
         try{
             BufferedReader in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            PrintWriter out = new PrintWriter(clientSocket.getOutputStream(),true);
             
             while((request = in.readLine()) != null){
                 System.out.println("클라이언트 요청: " + request);
@@ -41,9 +42,9 @@ public class ClientHandler implements Runnable {
             }
         }
         
-        catch(Exception ex){
+        catch(IOException ex){
             System.out.println("클라이언트 통신 오류");
-            ex.PrintStackTrace();
+            ex.printStackTrace();
         }
     }
     

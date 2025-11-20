@@ -13,7 +13,7 @@ import cse.oop2.hms_server.src.main.server.repository.UserRepository;
 public class AuthService {
    private final UserRepository userRepository; // user리퍼지토리 에서 데이터 가져오기
    
-   private AuthService(){
+   public AuthService(){
        this.userRepository = new UserRepository(); // AuthService 생성 시 유저 리퍼지토리 함께 생성
    }
    

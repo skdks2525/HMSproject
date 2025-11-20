@@ -22,14 +22,13 @@ public class ServerMain {
             ServerSocket serverSocket = new ServerSocket(PORT);
             while(true){
                 Socket clientSocket = serverSocket.accept();
-                PrintWriter out = new PrintWriter(clientSocket.getOutputStream());
                 System.out.println("클라이언트 접속");
                 Thread t = new Thread(new ClientHandler(clientSocket));
             t.start();
             }
         }
         
-        catch(Exception ex){
+        catch(IOException ex){
             ex.printStackTrace();
         }
     }
