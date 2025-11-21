@@ -17,7 +17,36 @@ public class AuthService {
        this.userRepository = new UserRepository(); // AuthService 생성 시 유저 리퍼지토리 함께 생성
    }
    
-   //이제부터 로그인 시도
+    /**
+     * 회원가입 (일반 사용자만) - CSV에 role=Customer로 저장
+     * - 입력 검증: 아이디/비밀번호 필수
+     * - 중복 방지: 동일 아이디 존재 시 가입 불가
+     * - 저장 성공 시 생성된 User 반환, 실패 시 null
+     */
+   public synchronized User registerUser(String id, String pw){
+       if(id == null || id.isEmpty() || pw == null || pw.isEmpty()){
+           System.out.println("아이디/비밀번호 누락");
+           return null;
+       }
+       if(userRepository.existsByUsername(id)){
+           System.out.println("이미 존재하는 아이디");
+           return null;
+       }
+       User user = new User(id, pw, "Customer");
+       boolean ok = userRepository.saveUser(user);
+       if(ok){
+           System.out.println("회원가입 성공");
+           return user;
+       }
+       System.out.println("파일 저장 중 오류");
+       return null;
+   }
+
+    /**
+     * 로그인 시도 (아이디/비밀번호 일치 확인)
+     * - 성공: 해당 User 반환
+     * - 실패: null 반환
+     */
    public User login(String id, String pw){
        User user = userRepository.findByUsername(id);
        
