@@ -11,7 +11,7 @@ import java.io.*;
 import java.net.*;
 
 /**
- *  각 클라이언트 연결을 개별 스레드에서 처리하는 클래스 (Runnable 인터페이스 구현)
+ *  각 클라이언트 연결을 개별 스레드에서 처리하는 클래스 (Runnable 인터페이스 구현).
  * @author user
  */
 public class ClientHandler implements Runnable {

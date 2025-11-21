@@ -7,7 +7,7 @@ import server.model.User;
 import server.repository.UserRepository;
 
 /**
- * 인증관련 로직 처리하는 클래스
+ * 인증관련 로직 처리하는 클래스.
  * @author user
  */
 public class AuthService {
