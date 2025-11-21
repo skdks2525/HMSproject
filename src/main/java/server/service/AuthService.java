@@ -2,9 +2,9 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package cse.oop2.hms_server.src.main.server.service;
-import cse.oop2.hms_server.src.main.server.model.User;
-import cse.oop2.hms_server.src.main.server.repository.UserRepository;
+package server.service;
+import server.model.User;
+import server.repository.UserRepository;
 
 /**
  * 인증관련 로직 처리하는 클래스

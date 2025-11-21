@@ -2,10 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package cse.oop2.hms_server.src.main.server.net;
-import cse.oop2.hms_server.src.main.server.service.AuthService;
+package server.net;
+import server.service.AuthService;
 //import cse.oop2.hms_server.src.main.server.service.ReservationService;
-import cse.oop2.hms_server.src.main.server.model.User;
+import server.model.User;
 import java.io.BufferedReader;
 import java.io.*;
 import java.net.*;

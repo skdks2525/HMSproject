@@ -2,7 +2,7 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  */
 
-package cse.oop2.hms_server.src.main.server.net;
+package server.net;
 import java.io.*;
 import java.net.*;
 import java.util.*;
