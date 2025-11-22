@@ -18,6 +18,29 @@ public class AuthService {
        this.userRepository = new UserRepository(); // AuthService 생성 시 유저 리퍼지토리 함께 생성
    }
    
+   /**
+    * 일반 사용자 회원가입 (role=Customer)
+    * @return 성공 시 User, 실패 시 null
+    */
+   public synchronized User registerUser(String id, String pw){
+       if(id == null || id.isEmpty() || pw == null || pw.isEmpty()){
+           System.out.println("아이디/비밀번호 누락");
+           return null;
+       }
+       // 중복 아이디 직접 검사 (리포지토리 add는 중복 검사하지 않음)
+       if(userRepository.existsByUsername(id)){
+           System.out.println("이미 존재하는 아이디");
+           return null;
+       }
+       User user = new User(id, pw, "Customer");
+       if(userRepository.add(user)){
+           System.out.println("회원가입 성공");
+           return user;
+       }
+       System.out.println("파일 저장 중 오류");
+       return null;
+   }
+
    //이제부터 로그인 시도
    public User login(String id, String pw){
        User user = userRepository.findByUsername(id);
@@ -41,10 +64,10 @@ public class AuthService {
        return userRepository.findAll();
    }
    public boolean addUser(String id, String pw, String role){
-           if(userRepository.findByUsername(id) != null){
-               return false;
-           }
-           return userRepository.add(new User(id, pw, role));    
+       if(userRepository.existsByUsername(id)){
+           return false;
+       }
+       return userRepository.add(new User(id, pw, role));
    }
    public boolean deleteUser(String id){
            return userRepository.delete(id);    
