@@ -56,6 +56,28 @@ public class ClientHandler implements Runnable {
             String command = parts[0].trim();
             
             switch(command){
+                case "GET_MENU_SALES":
+                    // 형식: GET_MENU_SALES:yyyy-MM-dd:yyyy-MM-dd
+                    if (parts.length == 3) {
+                        String start = parts[1];
+                        String end = parts[2];
+                        // ReportService에서 통합 매출 데이터 조회
+                        java.util.Map<String, Object> result = reportService.getMenuSalesByDateRange(start, end);
+                        double averageSales = (double) result.get("averageSales");
+                        @SuppressWarnings("unchecked")
+                        java.util.List<java.util.Map<String, Object>> salesTable = (java.util.List<java.util.Map<String, Object>>) result.get("salesTable");
+                        // 응답 문자열: MENU_SALES:평균매출|날짜,매출,최다판매메뉴;날짜,매출,최다판매메뉴;...
+                        StringBuilder sb = new StringBuilder("MENU_SALES:");
+                        sb.append(String.format("%.2f", averageSales)).append("|");
+                        boolean first = true;
+                        for (java.util.Map<String, Object> row : salesTable) {
+                            if (!first) sb.append(";");
+                            sb.append(row.get("date")).append(",").append(row.get("totalSales")).append(",").append(row.get("topMenu"));
+                            first = false;
+                        }
+                        return sb.toString();
+                    }
+                    return "ERROR:Format";
                 case "LOGIN":
                     if(parts.length == 3){
                         String username = parts[1];
@@ -86,26 +108,26 @@ public class ClientHandler implements Runnable {
                         sb.append(u.getId()).append(",").append(u.getPassword()).append(",").append(u.getRole()).append(",").append(u.getPhone()).append(",").append(u.getName()).append("/");
                     }
                     return sb.toString();
-                                case "GET_PAST_OCCUPANCY": {
-                                    // GET_PAST_OCCUPANCY:yyyy-MM-dd:yyyy-MM-dd
-                                    if (parts.length == 3) {
-                                        String start = parts[1];
-                                        String end = parts[2];
-                                        return reportService.handlePastOccupancyRequest(start, end);
-                                    }
-                                    return "PAST_OCCUPANCY:";
-                                }
-                                case "GET_CURRENT_OCCUPANCY": {
-                                    return reportService.handleCurrentOccupancyRequest();
-                                }
-                                case "GET_FUTURE_OCCUPANCY": {
-                                    if (parts.length == 3) {
-                                        String start = parts[1];
-                                        String end = parts[2];
-                                        return reportService.handleFutureOccupancyRequest(start, end);
-                                    }
-                                    return "FUTURE_OCCUPANCY:";
-                                }
+                case "GET_PAST_OCCUPANCY": {
+                    // GET_PAST_OCCUPANCY:yyyy-MM-dd:yyyy-MM-dd
+                    if (parts.length == 3) {
+                        String start = parts[1];
+                        String end = parts[2];
+                        return reportService.handlePastOccupancyRequest(start, end);
+                    }
+                    return "PAST_OCCUPANCY:";
+                }
+                case "GET_CURRENT_OCCUPANCY": {
+                    return reportService.handleCurrentOccupancyRequest();
+                }
+                case "GET_FUTURE_OCCUPANCY": {
+                    if (parts.length == 3) {
+                        String start = parts[1];
+                        String end = parts[2];
+                        return reportService.handleFutureOccupancyRequest(start, end);
+                    }
+                    return "FUTURE_OCCUPANCY:";
+                }
                 case "ADD_USER":
                     // 형식(필수): ADD_USER:id:name:pw:role:phone  => 총 6토큰, 모두 공백불가
                     {

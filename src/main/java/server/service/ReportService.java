@@ -1,18 +1,172 @@
 
-package server.service;
+    package server.service;
 
-import server.model.Reservation;
-import server.model.Room;
-import server.repository.ReservationRepository;
-import server.repository.RoomRepository;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.HashMap;
+    import server.model.Reservation;
+    import server.model.Room;
+    import server.repository.ReservationRepository;
+    import server.repository.RoomRepository;
+    import java.time.LocalDate;
+    import java.util.List;
+    import java.util.Map;
+    import java.util.ArrayList;
+    import java.util.LinkedHashMap;
+    import java.util.HashMap;
 
-public class ReportService {
+    public class ReportService {
+
+    /**
+     * 식음료 매출 통합 조회 메서드
+     * - 지정 기간(start~end) 동안의 평균 매출과 날짜별 매출/최다판매메뉴 표를 한 번에 반환
+     * - 클라이언트/핸들러에서 한 번에 사용하기 편하도록 통합 구조 제공
+     *
+     * @param start 시작일 (yyyy-MM-dd)
+     * @param end 종료일 (yyyy-MM-dd)
+     * @return Map<String, Object>: { "averageSales": double, "salesTable": List<Map<String, Object>> }
+     */
+    public Map<String, Object> getMenuSalesByDateRange(String start, String end) {
+        double averageSales = getAverageMenuSalesByDateRange(start, end);
+        List<Map<String, Object>> salesTable = getMenuSalesTableByDateRange(start, end);
+        Map<String, Object> result = new LinkedHashMap<>();
+        result.put("averageSales", averageSales);
+        result.put("salesTable", salesTable);
+        return result;
+    }
+
+        /**
+         * menu_orders.csv 파일을 날짜별로 분류하여 주문 리스트를 반환합니다.
+         * <p>
+         * - MenuOrderService를 통해 모든 주문(MenuOrder 객체 리스트)을 가져옵니다.
+         * - 각 주문의 orderTime(주문 일시)에서 날짜(LocalDate)만 추출합니다.
+         * - 날짜별로 주문 리스트를 Map에 누적합니다.
+         * <p>
+         * @return Map<LocalDate, List<MenuOrder>> : 날짜별 주문 리스트 (예: 2025-11-27 → [MenuOrder1, MenuOrder2, ...])
+         */
+        public Map<LocalDate, List<server.model.MenuOrder>> getMenuOrdersByDate() {
+            server.service.MenuOrderService menuOrderService = new server.service.MenuOrderService();
+            List<server.model.MenuOrder> allOrders = menuOrderService.getAllOrders();
+            Map<LocalDate, List<server.model.MenuOrder>> ordersByDate = new LinkedHashMap<>();
+            for (server.model.MenuOrder order : allOrders) {
+                LocalDate date = order.getOrderTime().toLocalDate();
+                // 날짜별로 주문 리스트를 누적
+                ordersByDate.computeIfAbsent(date, k -> new ArrayList<>()).add(order);
+            }
+            return ordersByDate;
+        }
+
+        /**
+         * menu_orders.csv 파일을 날짜별, 메뉴별로 분류하여 판매량을 집계합니다.
+         * <p>
+         * - getMenuOrdersByDate()로 날짜별 주문 리스트를 가져옵니다.
+         * - 각 날짜별로, 주문에 포함된 모든 메뉴(foodNames)를 카운트합니다.
+         * - 메뉴명별로 판매량을 누적하여 Map에 저장합니다.
+         * <p>
+         * @return Map<LocalDate, Map<메뉴명, 판매수>> (예: 2025-11-27 → { "약과": 2, "test09": 2 })
+         */
+        public Map<LocalDate, Map<String, Integer>> getMenuSalesCountByDate() {
+            Map<LocalDate, List<server.model.MenuOrder>> ordersByDate = getMenuOrdersByDate();
+            Map<LocalDate, Map<String, Integer>> salesByDate = new LinkedHashMap<>();
+            for (Map.Entry<LocalDate, List<server.model.MenuOrder>> entry : ordersByDate.entrySet()) {
+                LocalDate date = entry.getKey();
+                Map<String, Integer> menuCount = new HashMap<>();
+                for (server.model.MenuOrder order : entry.getValue()) {
+                    for (String menu : order.getFoodNames()) {
+                        // 메뉴별 판매량 누적
+                        menuCount.put(menu, menuCount.getOrDefault(menu, 0) + 1);
+                    }
+                }
+                salesByDate.put(date, menuCount);
+            }
+            return salesByDate;
+        }
+
+        /**
+         * menu_orders.csv 파일을 날짜별로 분류하여 매출 합계를 집계합니다.
+         * <p>
+         * - getMenuOrdersByDate()로 날짜별 주문 리스트를 가져옵니다.
+         * - 각 날짜별로, 주문의 totalPrice(매출)를 모두 더해 합계를 구합니다.
+         * <p>
+         * @return Map<LocalDate, Integer> : 날짜별 매출 합계 (예: 2025-11-27 → 5636)
+         */
+
+        public Map<LocalDate, Integer> getMenuTotalSalesByDate() {
+            Map<LocalDate, List<server.model.MenuOrder>> ordersByDate = getMenuOrdersByDate();
+            Map<LocalDate, Integer> totalSalesByDate = new LinkedHashMap<>();
+            for (Map.Entry<LocalDate, List<server.model.MenuOrder>> entry : ordersByDate.entrySet()) {
+                int sum = 0;
+                for (server.model.MenuOrder order : entry.getValue()) {
+                    // 주문별 매출 합산
+                    sum += order.getTotalPrice();
+                }
+                totalSalesByDate.put(entry.getKey(), sum);
+            }
+            return totalSalesByDate;
+        }
+
+        /**
+         * 지정한 기간(시작~종료) 동안의 일별 매출 합계의 평균을 계산합니다.
+         * <p>
+         * - getMenuTotalSalesByDate()로 날짜별 매출 합계를 가져옵니다.
+         * - 시작~종료 날짜 구간의 매출만 추출하여 합산 후, 영업일 수로 나눕니다.
+         * - 매출 데이터가 없는 날은 0으로 간주하지 않고, 해당 날짜는 평균 계산에서 제외합니다.
+         *
+         * @param start 시작일 (yyyy-MM-dd)
+         * @param end 종료일 (yyyy-MM-dd)
+         * @return double: 지정 기간 내 평균 매출 (소수점 2자리)
+         */
+        public double getAverageMenuSalesByDateRange(String start, String end) {
+            LocalDate startDate = LocalDate.parse(start);
+            LocalDate endDate = LocalDate.parse(end);
+            Map<LocalDate, Integer> salesByDate = getMenuTotalSalesByDate();
+            int sum = 0;
+            int count = 0;
+            for (Map.Entry<LocalDate, Integer> entry : salesByDate.entrySet()) {
+                LocalDate date = entry.getKey();
+                if (!date.isBefore(startDate) && !date.isAfter(endDate)) {
+                    sum += entry.getValue();
+                    count++;
+                }
+            }
+            if (count == 0) return 0.0;
+            return Math.round((sum * 100.0 / count)) / 100.0; // 소수점 2자리 반올림
+        }
+
+        /**
+         * 지정한 기간(시작~종료) 동안 날짜별로 (1) 매출 합계, (2) 최다판매메뉴를 표 형태로 반환합니다.
+         * <p>
+         * - getMenuTotalSalesByDate(), getMenuSalesCountByDate() 활용
+         * - 각 날짜별로 매출 합계와 최다판매메뉴(동률이면 아무거나)를 구해 리스트에 담아 반환
+         *
+         * @param start 시작일 (yyyy-MM-dd)
+         * @param end 종료일 (yyyy-MM-dd)
+         * @return List<Map<String, Object>>: 각 날짜별 {date, totalSales, topMenu}
+         */
+        public List<Map<String, Object>> getMenuSalesTableByDateRange(String start, String end) {
+            LocalDate startDate = LocalDate.parse(start);
+            LocalDate endDate = LocalDate.parse(end);
+            Map<LocalDate, Integer> salesByDate = getMenuTotalSalesByDate();
+            Map<LocalDate, Map<String, Integer>> countByDate = getMenuSalesCountByDate();
+            List<Map<String, Object>> table = new ArrayList<>();
+            for (LocalDate date = startDate; !date.isAfter(endDate); date = date.plusDays(1)) {
+                int totalSales = salesByDate.getOrDefault(date, 0);
+                String topMenu = "-";
+                Map<String, Integer> menuCount = countByDate.get(date);
+                if (menuCount != null && !menuCount.isEmpty()) {
+                    int max = java.util.Collections.max(menuCount.values());
+                    for (Map.Entry<String, Integer> e : menuCount.entrySet()) {
+                        if (e.getValue() == max) {
+                            topMenu = e.getKey();
+                            break; // 동률이면 아무거나
+                        }
+                    }
+                }
+                Map<String, Object> row = new LinkedHashMap<>();
+                row.put("date", date.toString());
+                row.put("totalSales", totalSales);
+                row.put("topMenu", topMenu);
+                table.add(row);
+            }
+            return table;
+        }
 
     /**
      * 과거 점유율 요청 핸들러
@@ -150,10 +304,12 @@ public class ReportService {
     private final ReservationRepository reservationRepository;
     private final RoomRepository roomRepository;
 
+
     public ReportService(ReservationRepository reservationRepository, RoomRepository roomRepository) {
         this.reservationRepository = reservationRepository;
         this.roomRepository = roomRepository;
     }
+
 
     /**
      * 과거 점유율 보고서: 각 객실별로 지정 기간 내 점유율(Confirmed 예약 기준) 계산
