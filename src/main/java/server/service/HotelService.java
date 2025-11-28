@@ -9,6 +9,12 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 public class HotelService {
+        public RoomRepository getRoomRepository() {
+            return roomRepo;
+        }
+        public ReservationRepository getReservationRepository() {
+            return resRepo;
+        }
     private final RoomRepository roomRepo = new RoomRepository();
     private final ReservationRepository resRepo = new ReservationRepository();
     private final PaymentRepository payRepo = new PaymentRepository();
@@ -64,8 +70,8 @@ public class HotelService {
 
         for (Reservation r : all) {
             try {
-                // 결제 상태가 'Paid'인 예약만 포함
-                if (r.getReservationStatus() == null || !r.getReservationStatus().equalsIgnoreCase("Paid")) continue;
+                // ReservationStatus가 'Confirmed'인 예약만 포함
+                if (r.getReservationStatus() == null || !r.getReservationStatus().equalsIgnoreCase("Confirmed")) continue;
                 LocalDate in = LocalDate.parse(r.getCheckInDate(), dateOnlyFormatter);
                 LocalDate out = LocalDate.parse(r.getCheckOutDate(), dateOnlyFormatter);
 
