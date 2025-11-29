@@ -1,14 +1,10 @@
-menuId,name,price,category,IsAvailable,Stock
-main01,파스타,12000,메인음식,false,0
-dessert01,아이스크림,2000,디저트,false,0
-beverage01,아메리카노,2500,음료,false,0
-test,test01,1234,메인음식,false,0
-test02,test02,1234,메인음식,false,0
-test04,test04,1234,메인음식,false,0
-test05,test05,1234,메인음식,false,0
-test06,test06,1234,메인음식,false,0
-test07,test07,1212,메인음식,true,6
-test08,test08,1234,메인음식,false,0
-test09,test09,1212,디저트,true,7
-test11,약과,1000,디저트,true,7
-test13,test13,5555,메인음식,true,5
+main01,스테이크,35000,메인음식,true,6
+main02,파스타,25000,메인음식,true,9
+main03,햄버거,13000,메인음식,true,3
+main04,해물라면,15000,메인음식,true,14
+dessert01,조각 케이크,10000,디저트,true,14
+dessert02,과일 세트,20000,디저트,true,13
+dessert03,초콜릿 세트,10000,디저트,false,0
+beverage01,아메리카노,5000,음료,true,15
+beverage02,초코우유,4000,음료,true,34
+beverage03,유자차,5000,음료,true,13

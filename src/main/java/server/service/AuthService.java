@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package server.service;
 import server.model.User;
 import server.repository.UserRepository;
@@ -15,7 +11,7 @@ public class AuthService {
    private final UserRepository userRepository; // user리퍼지토리 에서 데이터 가져오기
    
    public AuthService(){
-       this.userRepository = new UserRepository(); // AuthService 생성 시 유저 리퍼지토리 함께 생성
+       this.userRepository = new UserRepository();
    }
    
    /**
@@ -63,7 +59,7 @@ public class AuthService {
    public List<User> getAllUsers(){
        return userRepository.findAll();
    }
-   public boolean addUser(String id, String name, String pw, String role, String phone){
+   public synchronized boolean addUser(String id, String name, String pw, String role, String phone){
        if(id == null || id.trim().isEmpty()) return false;
        if(name == null || name.trim().isEmpty()) return false;
        if(pw == null || pw.trim().isEmpty()) return false;
@@ -74,10 +70,10 @@ public class AuthService {
        }
        return userRepository.add(new User(id.trim(), name.trim(), pw.trim(), role.trim(), phone.trim()));
    }
-   public boolean deleteUser(String id){
+   public synchronized boolean deleteUser(String id){
            return userRepository.delete(id);    
    }
-   public boolean modifyUser(String id, String name, String pw, String role, String phone){
+   public synchronized boolean modifyUser(String id, String name, String pw, String role, String phone){
        if(id == null || id.trim().isEmpty()) return false;
        if(name == null || name.trim().isEmpty()) return false;
        if(pw == null || pw.trim().isEmpty()) return false;

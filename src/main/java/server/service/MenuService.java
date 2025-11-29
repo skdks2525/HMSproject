@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package server.service;
 
 import server.model.Menu;
@@ -27,7 +23,7 @@ public class MenuService {
      * @param isAvailable 판매 여부
      * @return 등록되었는가?
      */
-    public boolean AddMenu(String menuId, String name, int price, String category, boolean isAvailable, int stock) {
+    public synchronized boolean AddMenu(String menuId, String name, int price, String category, boolean isAvailable, int stock) {
         Menu newMenu = new Menu(menuId, name, price, category, isAvailable, stock);
         newMenu.setIsAvailable(isAvailable);
         newMenu.setStock(stock);
@@ -44,7 +40,7 @@ public class MenuService {
      * @return 업데이트되었는가?
      */
     
-    public boolean updateMenu(String menuId, String name, int price, String category, boolean isAvailable, int stock) {
+    public synchronized boolean updateMenu(String menuId, String name, int price, String category, boolean isAvailable, int stock) {
         Optional<Menu> menuOptional = menuRepository.findById(menuId);
         if (menuOptional.isPresent()) {
             Menu updatingMenu = menuOptional.get();
@@ -69,7 +65,7 @@ public class MenuService {
      * @param menuId 삭제할 메뉴 ID
      * @return 삭제되었는가?
      */
-    public boolean deleteMenu(String menuId) {
+    public synchronized boolean deleteMenu(String menuId) {
         // Menu Optional 리스트 중 삭제할 menuId 탐색
         Optional<Menu> menuToDelete = menuRepository.findById(menuId);
         
@@ -85,7 +81,7 @@ public class MenuService {
      * @return 모든 메뉴 List
      */
     
-    public List<Menu> getAllMenus() {
+    public synchronized List<Menu> getAllMenus() {
         return menuRepository.findAll();
     }
 }

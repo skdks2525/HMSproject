@@ -11,11 +11,11 @@ public class MenuOrderService {
         this.orderRepository = new MenuOrderRepository();
     }
 
-    public List<MenuOrder> getAllOrders() {
+    public synchronized List<MenuOrder> getAllOrders() {
         return orderRepository.findAll();
     }
 
-    public void saveOrder(MenuOrder order) {
+    public synchronized void saveOrder(MenuOrder order) {
         orderRepository.save(order);
     }
 }

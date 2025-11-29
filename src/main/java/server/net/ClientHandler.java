@@ -14,16 +14,16 @@ public class ClientHandler implements Runnable {
     private final AuthService authService;
     private final HotelService hotelService;
     private final MenuService menuService;
-    private final server.service.MenuOrderService menuOrderService;
+    private final MenuOrderService menuOrderService;
     private final ReportService reportService;
 
-    public ClientHandler(Socket socket){
+    public ClientHandler(Socket socket, AuthService authService,HotelService hotelService, MenuService menuService, MenuOrderService menuOrderService, ReportService reportService){
         this.clientSocket = socket;
-        this.authService = new AuthService();
-        this.hotelService = new HotelService();
-        this.menuService = new MenuService();
-        this.menuOrderService = new server.service.MenuOrderService();
-        this.reportService = new ReportService(hotelService.getReservationRepository(), hotelService.getRoomRepository());
+        this.authService = authService;
+        this.hotelService = hotelService;
+        this.menuService = menuService;
+        this.menuOrderService = menuOrderService;
+        this.reportService = reportService;
     }
     
     @Override

@@ -10,17 +10,22 @@ import java.util.stream.Collectors;
 
 public class HotelService {
 
-    private final RoomRepository roomRepo = new RoomRepository();
-    private final ReservationRepository resRepo = new ReservationRepository();
-    private final PaymentRepository payRepo = new PaymentRepository();    
-    private final ScheduleRepository scheduleRepo = new ScheduleRepository();
+    private final RoomRepository roomRepo;
+    private final ReservationRepository resRepo;
+    private final PaymentRepository payRepo;    
+    private final ScheduleRepository scheduleRepo;
     private static final Object LOCK = new Object();
 
     private static final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    
     public HotelService(){
+        this.roomRepo = new RoomRepository();
+        this.resRepo = new ReservationRepository();
+        this.payRepo = new PaymentRepository();
+        this.scheduleRepo = new ScheduleRepository();
         startAutoCancelScheduler();
-    }   
+    }
     
     private void startAutoCancelScheduler() {
                 
@@ -274,13 +279,13 @@ public class HotelService {
             targetTime = targetTime.plusDays(1);
         }
         
-        // 목표 시간까지 남은 초(Seconds) 계산
         long initialDelay = Duration.between(now, targetTime).getSeconds();
-        long oneDayInSeconds = 24 * 60 * 60; // 24시간 주기
+        long oneDayInSeconds = 24 * 60 * 60; 
         
+        // 중복 실행 방지를 위해 Runnable 작업 정의
         scheduler.scheduleAtFixedRate(() -> {
             synchronized (LOCK) { 
-                System.out.println("18:00 미보장 예약 자동취소");
+                System.out.println("[System] 18:00 미보장 예약 자동취소 점검 시작");
                 checkAndCancelUnpaidReservations();
             }
         }, initialDelay, oneDayInSeconds, TimeUnit.SECONDS);
@@ -298,7 +303,7 @@ public class HotelService {
                 LocalDateTime createdAt = LocalDateTime.parse(r.getCreatedAt(), formatter);
                 LocalDateTime deadline;
 
-                // [조건] 17시 이전 예약 -> 당일 18시 마감
+                // [조건] 17시 이전 예약 -> 당일 18시 마감  
                 // [조건] 17시 이후 예약 -> 다음날 18시 마감
                 if (createdAt.getHour() < 17) {
                     deadline = createdAt.toLocalDate().atTime(18, 0, 0);
